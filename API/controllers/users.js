@@ -1,9 +1,10 @@
-const User = require('../models/users')
-require('dotenv').config()
+const User = require('../models/userSchema')
 
-exports.createUSer = async (req, res) => {
-    let userExit = await User.findOne({ email: req.body.email})
-    if (userExit) {
+exports.createUser = async (req, res) => {
+    try {
+
+        let userExist = await User.findOne({ email: req.body.email})
+        if (userExist) {
         return res.json({
             message: 'Error!',
             response: 'User already exist'
@@ -11,18 +12,25 @@ exports.createUSer = async (req, res) => {
 
     }
     else{
-        let{ names,email,country } = req.body
-        let newUser = new User({
-            names,email,country
-        })
+        let newUser = new User(req.body)
+        
 let data = await newUser.save()
-return res.json({
+return res.send({
     message: 'success',
     userData: data
 })
-    }
 }
-exports.getALLUser = async (req, res) => {
+} catch(err) {
+    console.log(err)
+    return res.status(500).send({
+        msg: err.message,
+        status: 500
+    })
+}
+}
+
+
+exports.getAllUser = async (req, res) => {
     let getUsers = await User.find({})
     return res.json({
         message: "success!",
@@ -30,7 +38,7 @@ exports.getALLUser = async (req, res) => {
     })
 }
 exports.getSingleUser = async(req, res) => {
-    let getUSers = await User.findOne({"_id": req.params.id})
+    let getUsers = await User.findOne({"_id": req.params.id})
     return res.json({
         message: "success!",
         response: getUsers
